@@ -2,9 +2,13 @@ import json
 import os
 from openai import OpenAI
 
-client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+def call_llm_json(system_prompt: str, user_prompt: str, schema: dict, model: str = "gpt-4o-mini"):
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        raise ValueError("OPENAI_API_KEY is missing")
 
-def call_llm_json(system_prompt: str, user_prompt: str, schema: dict, model: str = "gpt-5"):
+    client = OpenAI(api_key=api_key)
+
     response = client.responses.create(
         model=model,
         input=[
@@ -20,4 +24,5 @@ def call_llm_json(system_prompt: str, user_prompt: str, schema: dict, model: str
             }
         },
     )
+
     return json.loads(response.output_text)
