@@ -12,7 +12,7 @@ if "OPENAI_API_KEY" in st.secrets:
     os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
 
 st.title("🌍 EcoGuardian AI")
-st.subheader("AI Multi-Agent LLM Sustainability Monitoring Dashboard")
+st.subheader("AI Multi-Agent Sustainability Monitoring Dashboard")
 
 if "result_df" not in st.session_state:
     st.session_state.result_df = None
@@ -23,9 +23,9 @@ uploaded_df = None
 if uploaded_file is not None:
     uploaded_df = pd.read_csv(uploaded_file)
 
-if st.button("Run Multi-Agent LLM Analysis"):
+if st.button("Run Multi-Agent Analysis"):
     st.session_state.result_df = coordinator_run(uploaded_df)
-    st.success("LLM multi-agent analysis completed successfully")
+    st.success("Analysis completed successfully")
 
 result_df = st.session_state.result_df
 
@@ -47,12 +47,24 @@ if result_df is not None:
         st.markdown(f"### {row['site']}")
         st.write(f"**Rule-Based Risk Level:** {row['risk_level']}")
         st.write(f"**Rule-Based Summary:** {row['analysis_summary']}")
-        st.write(f"**LLM Environmental Summary:** {row['llm_environmental_summary']}")
-        st.write(f"**LLM Key Issues:** {row['llm_key_issues']}")
-        st.write(f"**LLM Recommendation:** {row['llm_recommendation']}")
-        st.write(f"**LLM Urgency:** {row['llm_urgency']}")
-        st.write(f"**Alert Title:** {row['alert_title']}")
-        st.write(f"**Alert Message:** {row['alert_message']}")
+
+        if "llm_environmental_summary" in result_df.columns:
+            st.write(f"**LLM Environmental Summary:** {row['llm_environmental_summary']}")
+
+        if "llm_key_issues" in result_df.columns:
+            st.write(f"**LLM Key Issues:** {row['llm_key_issues']}")
+
+        if "llm_recommendation" in result_df.columns:
+            st.write(f"**LLM Recommendation:** {row['llm_recommendation']}")
+
+        if "llm_urgency" in result_df.columns:
+            st.write(f"**LLM Urgency:** {row['llm_urgency']}")
+
+        if "alert_title" in result_df.columns:
+            st.write(f"**Alert Title:** {row['alert_title']}")
+
+        if "alert_message" in result_df.columns:
+            st.write(f"**Alert Message:** {row['alert_message']}")
 
         if row["send_alert"]:
             st.warning("Alert should be sent for this site")
@@ -67,21 +79,23 @@ if result_df is not None:
         else:
             alerts = result_df[result_df["send_alert"] == True]
 
+            payload_columns = ["site", "risk_score", "risk_level", "send_alert"]
+
+            optional_columns = [
+                "llm_environmental_summary",
+                "llm_recommendation",
+                "alert_title",
+                "alert_message",
+            ]
+
+            for col in optional_columns:
+                if col in alerts.columns:
+                    payload_columns.append(col)
+
             payload = {
                 "project": "EcoGuardian AI",
                 "total_sites": len(result_df),
-                "high_risk_sites": alerts[
-                    [
-                        "site",
-                        "risk_score",
-                        "risk_level",
-                        "llm_environmental_summary",
-                        "llm_recommendation",
-                        "alert_title",
-                        "alert_message",
-                        "send_alert",
-                    ]
-                ].to_dict(orient="records")
+                "high_risk_sites": alerts[payload_columns].to_dict(orient="records")
             }
 
             st.write("Payload being sent:")
