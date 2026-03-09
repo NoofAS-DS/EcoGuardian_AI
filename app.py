@@ -1,5 +1,11 @@
 import os
 import streamlit as st
+
+st.set_page_config(page_title="EcoGuardian AI", layout="wide")
+
+if "OPENAI_API_KEY" in st.secrets:
+    os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
+
 import pandas as pd
 import plotly.express as px
 
