@@ -25,15 +25,14 @@ def coordinator_run(uploaded_df=None):
             site_row["llm_key_issues"] = " | ".join(llm_analysis.get("key_issues", []))
             site_row["llm_recommendation"] = llm_recommendation.get("recommendation", "")
             site_row["llm_urgency"] = llm_recommendation.get("urgency", "")
-
             site_row["send_alert"] = bool(
                 site_row.get("risk_level") == "High" or llm_recommendation.get("send_alert", False)
             )
-
             site_row["alert_title"] = llm_alert.get("alert_title", "")
             site_row["alert_message"] = llm_alert.get("alert_message", "")
+            site_row["llm_error"] = ""
 
-        except Exception:
+        except Exception as e:
             site_row["llm_environmental_summary"] = ""
             site_row["llm_key_issues"] = ""
             site_row["llm_recommendation"] = ""
@@ -41,6 +40,7 @@ def coordinator_run(uploaded_df=None):
             site_row["send_alert"] = bool(site_row.get("risk_level") == "High")
             site_row["alert_title"] = ""
             site_row["alert_message"] = ""
+            site_row["llm_error"] = str(e)
 
         result_rows.append(site_row)
 
