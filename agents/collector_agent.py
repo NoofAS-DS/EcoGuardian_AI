@@ -2,7 +2,7 @@ import pandas as pd
 from datetime import datetime
 
 
-def collector_agent(uploaded_df: pd.DataFrame | None = None) -> pd.DataFrame:
+def collector_agent(uploaded_df=None):
     if uploaded_df is not None and not uploaded_df.empty:
         return uploaded_df.copy()
 
